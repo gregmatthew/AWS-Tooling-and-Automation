@@ -1,0 +1,159 @@
+169-[JAWS]-Lab - Using AWS Systems Manager
+AWS Systems Manager Lab
+Lab Overview
+AWS Systems Manager is a collection of capabilities that centralizes operational data and automates tasks across AWS resources. It enables configuration and management of Amazon EC2 instances, on-premises servers, virtual machines, and other AWS resources at scale.
+Objectives
+After completing this lab, you will be able to use AWS Systems Manager to:
+
+Verify configurations and permissions.
+Run tasks on multiple servers.
+Update application settings or configurations.
+Access the command line on an instance.
+
+Duration
+Approximately 30 minutes.
+Accessing the AWS Management Console
+
+At the top of the instructions, choose Start Lab to launch the lab.
+Wait until the message "Lab status: ready" appears, then choose X to close the Start Lab panel.
+Next to Start Lab, choose AWS to open the AWS Management Console in a new browser tab. The system automatically signs you in.
+Tip: If a new browser tab does not open, check for a banner or icon at the top of your browser indicating that pop-ups are blocked. Choose the banner or icon and select Allow pop-ups.
+
+
+Arrange the AWS Management Console so it appears alongside these instructions.
+Note: Do not change the Region unless instructed.
+
+
+
+Task 1: Generate Inventory Lists for Managed Instances
+Fleet Manager, a capability of Systems Manager, collects operating system information, application information, and metadata from EC2 instances, on-premises servers, or virtual machines in a hybrid environment. You can query metadata to understand which instances comply with your software policy and which need updates.
+Steps
+
+In the AWS Management Console, in the search box, enter Systems Manager and press Enter to access the Systems Manager console page.
+In the left navigation pane, under Node Management, choose Fleet Manager.
+Choose the Account management dropdown list, and select Set up inventory.
+To create an association that collects software and settings information for your managed instance:
+In the Provide inventory details section, for Name, enter Inventory-Association.
+In the Targets section:
+For Specify targets by, choose Manually selecting instances.
+Select the row for Managed Instance.
+
+
+Leave other options as default.
+
+
+Choose Setup Inventory.
+A banner with the message "Setup inventory request succeeded" appears on the Fleet Manager page.
+
+
+Choose the Node ID link to go to the Node overview.
+Choose the Inventory tab to view all applications on the instance. Review the installed applications and explore options in the Inventory type dropdown list.
+
+Outcome: You have created a Systems Manager inventory association, allowing you to review and validate software configurations without needing SSH access.
+Task 2: Install a Custom Application Using Run Command
+Run Command, a capability of Systems Manager, allows you to install applications on EC2 instances. In this task, you install the Widget Manufacturing Dashboard, which includes an Apache web server, PHP, AWS SDK, and the web application, then start the web server.
+Steps
+
+In the upper-left corner, expand the menu icon. Under Node Management, choose Run Command.
+Choose Run command to view a list of pre-configured documents for common commands.
+Choose the search icon in the box, then select:
+Owner
+Owned by me
+Note: Do not enter "Owner" or "Owned by me" as text; this will not return results.
+
+
+If not already selected, select the document.
+Verify the document details:
+Description: Install Dashboard App
+Document version: 1 (Default)
+Keep the default setting.
+
+
+For Target selection, choose Choose instances manually.
+In the Instances section, select Managed Instance.
+Note: The Managed Instance has the Systems Manager agent installed and registered. You can also use tags to target multiple instances.
+
+
+In the Output options section, clear Enable an S3 bucket.
+Expand the AWS command line interface command section to view the CLI command for initiating Run Command (copy for future scripting if needed).
+Choose Run.
+A banner with the Command ID indicates the command was sent successfully.
+
+
+After 1-2 minutes, check the Overall status. It should change to Success. If not, choose the refresh icon to update.
+In the Vocareum console:
+Choose the Details dropdown list at the top.
+Choose Show.
+Copy the ServerIP value (the public IP address).
+
+
+Open a new browser tab, paste the copied IP address, and press Enter to view the Widget Manufacturing Dashboard.
+
+Outcome: You have used Run Command to install a custom application on an instance without SSH access.
+Task 3: Use Parameter Store to Manage Application Settings
+Parameter Store provides secure, hierarchical storage for configuration data and secrets, such as passwords or database strings, stored as plain text or encrypted data.
+Steps
+
+Keep the Widget Manufacturing Dashboard browser tab open and return to the AWS Systems Manager tab.
+In the left navigation pane, under Application Management, choose Parameter Store.
+Choose Create parameter.
+Configure the parameter:
+Name: /dashboard/show-beta-features
+Description: Display beta features
+Tier: Leave as default.
+Type: Leave as default.
+Value: True
+
+
+Choose Create parameter.
+A banner with the message "Create parameter request succeeded" appears.
+Note: The parameter uses a hierarchical path (e.g., /dashboard/<option>). The application checks this parameter to display additional features.
+
+
+Return to the browser tab with the application and refresh the page.
+If the tab was closed, reopen it using the ServerIP from the Details dropdown in the Vocareum console.
+Result: Three charts appear, including a beta chart, as the application checks Parameter Store for the parameter.
+
+
+Optional: Delete the parameter and refresh the application page. The third chart disappears.
+
+Outcome: You have used Parameter Store to manage application settings, enabling dynamic feature activation.
+Task 4: Use Session Manager to Access Instances
+Session Manager provides secure, auditable access to EC2 instances via a browser-based shell or AWS CLI, eliminating the need for inbound ports, bastion hosts, or SSH keys.
+Steps
+
+In the left navigation pane, under Node Management, choose Session Manager.
+Choose Start session.
+Select Managed Instance.
+Choose Start session to open a new session tab in your browser.
+Activate the cursor by clicking anywhere in the session window.
+Run the following command to list application files:ls /var/www/html
+
+
+Run the following commands to retrieve EC2 instance details:if [[ -z "${AWS_DEFAULT_REGION}" ]]; then
+    AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    export AWS_DEFAULT_REGION=${AZ::-1}
+fi
+aws ec2 describe-instances
+
+
+Output: Lists EC2 instance details in JSON format.
+
+
+
+Outcome: You have accessed an instance via Session Manager, verified application files, and retrieved instance details without SSH. Session Manager supports IAM policies and CloudTrail logging for enhanced security and auditing.
+Conclusion
+You have successfully:
+
+Verified configurations and permissions.
+Run tasks on multiple servers.
+Updated application settings or configurations.
+Accessed the command line on an instance.
+
+Lab Complete
+
+At the top of the page, choose End Lab, then choose Yes to confirm.
+A panel appears indicating that lab resources are terminating.
+
+
+Close the End Lab panel by choosing the X in the upper-right corner.
